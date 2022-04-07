@@ -2,6 +2,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import detrend1d as dtr
 
 
 def numbered_condition_labels_to_integers(slist):
@@ -60,6 +61,7 @@ data       = np.load(fnameDATA, allow_pickle=True)
 
 # assemble data for all conditions (single variable):
 icond        = numbered_condition_labels_to_integers( cond )
+sess         = np.asarray(sess, dtype=int)
 d            = dict(cond=icond, tsess=tsess, tsteps=tsteps, sess=sess)
 nsess        = len(cond)
 n            = [(sess==i).sum()  for i in range(nsess)]  # number of trials per session
@@ -70,7 +72,6 @@ for vname in varnames:
 
 
 # save:
-dir1         = '/Users/todd/GitHub/detrend1d/Data/1-Imported/'
-fnameNPZ     = os.path.join(dir1, 's%03d.npz'%subj)
+fnameNPZ     = os.path.join(dtr.dirDATA, 's%03d.npz'%subj)
 np.savez_compressed(fnameNPZ, **d)
 
