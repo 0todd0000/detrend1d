@@ -48,6 +48,7 @@ class Metadata(object):
 			c[ self._sess == ii ] = cc 
 		return c
 
+	@property
 	def condstr(self):   # (nsteps,) condition string labels
 		return np.hstack( [[s]*n for s,n in zip(self.scondstr,self.snsteps)] )
 
@@ -110,7 +111,7 @@ class Metadata(object):
 		ax.set_xticklabels( self.scondstr )
 		[ax.plot( xx, ddt, 'o', ms=9, color=self._cond_colors[c])[0]  for xx,ddt,c in zip(x, dt, self.scond)]
 		ax.axhline( dt[1:].mean(), color='0.7', ls='--', label='Mean' )
-		ax.set_xlim( -0.2, 6.2 )
+		ax.set_xlim( -0.2, self.nsess - 0.8 )
 		ax.legend()
 		ax.set_xlabel('Session')
 		ax.set_ylabel('Duration between session starts (min)')

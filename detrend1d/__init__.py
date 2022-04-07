@@ -2,6 +2,13 @@
 __version__ = '0.2.0'  # 2022-04-07
 
 import os,pathlib
+from . metadata import Metadata
+from . import cls
+from . import models
+from . import rand
+
+
+Dataset0D = cls.Dataset0D
 
 
 dirREPO  = pathlib.Path( __file__ ).parent.parent

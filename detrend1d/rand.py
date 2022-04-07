@@ -95,10 +95,11 @@ class ExperimentDatasetGenerator0D(_RandomNumberGenerator):
 			from . metadata import Metadata
 			# from . import util
 			# cond      = util.as_cond_counted( self.cond, asstr=True )
-			tsess     = [t[s==ss][0]  for ss in range(self.ns)]
-			tsteps    = t
-			sess      = s
-			md        = Metadata(self.cond, tsess, tsteps, sess)
+			tsess     = np.array([t[s==ss][0]  for ss in range(self.ns)])
+			tsteps    = np.array(t)
+			tstepsr   = np.hstack([tsteps[s==i] - t0    for i,t0 in enumerate(tsess)])
+			sess      = np.array(s)
+			md        = Metadata(self.cond, tsess, tstepsr, sess)
 			return Dataset0D( y, md )
 		else:
 			return t,y,s,c

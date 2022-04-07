@@ -64,14 +64,19 @@ class Dataset0D(object):
 	
 		plt.tight_layout()
 
-	def plot(self, ax=None):
+	def plot(self, ax=None, legend=True):
 		ax      = plt.gca() if (ax is None) else ax
 		colors  = ['0.7', 'b', 'c', 'r']
 		scolors = [colors[c]  for c in self.md.scond]
 		t,y     = self.md.t, self.dv
 		sess    = self.md.sess
 		slabels = self.md.scondstr
+		h,s     = [],[]
 		for i,(color,slabel) in enumerate( zip(scolors,slabels) ):
-			ax.plot(t[sess==i]/60, y[sess==i], 'o', color=color, ms=3, label=slabel)
+			hh  = ax.plot(t[sess==i]/60, y[sess==i], 'o', color=color, ms=3)[0]
+			if slabel not in s:
+				h.append( hh )
+				s.append( slabel )
 		ax.set_xlabel('Time (min)', size=14) 
+		ax.legend( h, s, ncol=self.md.nsess )
 		plt.tight_layout()
