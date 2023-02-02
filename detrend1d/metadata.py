@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 class Metadata(object):
 	
-	_cond_labels      = ['A', 'Afa', 'Afo', 'B']
+	# _cond_labels      = ['A', 'Afa', 'Afo', 'B']
+	_cond_labels      = ['A', 'B']
 	_cond_colors      = ['0.7', 'b', 'c', 'r']
 	
 	def __init__(self, cond, tsess, tsteps, sess):

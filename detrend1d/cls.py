@@ -18,6 +18,10 @@ class Dataset0D(object):
 	def metadata(self):
 		return self.md
 		
+	@property
+	def session_means(self):
+		usess = np.unique(self.md._sess)
+		return np.array(   [self.y[self.md._sess == u].mean(axis=0)   for u in usess])
 		
 	def plot_verbose(self):
 		fig,axs = plt.subplots( 4, 3, figsize=(12,12) )
@@ -64,7 +68,7 @@ class Dataset0D(object):
 	
 		plt.tight_layout()
 
-	def plot(self, ax=None, legend=True):
+	def plot(self, ax=None, legend=True, legkwargs={}):
 		ax      = plt.gca() if (ax is None) else ax
 		colors  = ['0.7', 'b', 'c', 'r']
 		scolors = [colors[c]  for c in self.md.scond]
@@ -77,6 +81,13 @@ class Dataset0D(object):
 			if slabel not in s:
 				h.append( hh )
 				s.append( slabel )
-		ax.set_xlabel('Time (min)', size=14) 
-		ax.legend( h, s, ncol=self.md.nsess )
+		ax.set_xlabel('Time (min)', size=14)
+		if legend:
+			ax.legend( h, s, **legkwargs )
 		plt.tight_layout()
+		
+		
+	# def plot_trendline(self, model, ax=None, **kwargs):
+	# 	ax = plt.gca() if (ax is None) else ax
+	# 	ax.plot(self.md.t/60, model.yhat, **kwargs)
+		
