@@ -6,15 +6,14 @@ import matplotlib.pyplot as plt
 
 class Metadata(object):
 	
-	# _cond_labels      = ['A', 'Afa', 'Afo', 'B']
-	_cond_labels      = ['A', 'B']
 	_cond_colors      = ['0.7', 'b', 'c', 'r']
 	
-	def __init__(self, cond, tsess, tsteps, sess):
-		self.scond    = cond    # (nsess,)  condition integer labels
-		self._tsess   = tsess   # (nsess,)  condition starting times
-		self._tsteps  = tsteps  # (nsteps,) step times (within-session)
-		self._sess    = np.asarray(sess, dtype=int)   # (nsteps,) session integer labels
+	def __init__(self, cond, tsess, tsteps, sess, cond_labels=['A', 'Afa', 'Afo', 'B']):
+		self._cond_labels = cond_labels # (nsess,)  condition str labels
+		self.scond        = cond        # (nsess,)  condition int labels
+		self._tsess       = tsess       # (nsess,)  condition starting times
+		self._tsteps      = tsteps      # (nsteps,) step times (within-session)
+		self._sess        = np.asarray(sess, dtype=int)   # (nsteps,) session integer labels
 
 	def __repr__(self):
 		s  = 'Metadata\n'

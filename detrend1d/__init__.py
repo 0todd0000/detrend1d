@@ -1,5 +1,5 @@
 
-__version__ = '0.2.0'  # 2022-04-07
+__version__ = '0.2.1'  # 2023-02-10
 
 import os,pathlib
 from . metadata import Metadata
