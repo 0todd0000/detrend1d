@@ -5,7 +5,10 @@ import os,pathlib
 # from . metadata import Metadata
 # from . import cls
 # from . import models
+from . import datum
 from . import rand
+
+Datum  = datum.Datum
 
 
 # Dataset0D = cls.Dataset0D
