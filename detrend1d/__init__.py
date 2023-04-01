@@ -7,6 +7,7 @@ import os,pathlib
 # from . import models
 from . import datum
 from . import rand
+from . import trends
 
 Datum  = datum.Datum
 
