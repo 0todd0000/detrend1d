@@ -8,32 +8,23 @@ import numpy as np
 
 
 
+
 class Linear(object):
-	pass
-	# def __init__(self, slope0=-1, slope1=1, intercept0=0, intercept1=0):
-	# 	self.a0              = slope0
-	# 	self.a1              = slope1
-	# 	self.b0              = intercept0
-	# 	self.b1              = intercept1
-	#
-	#
-	# def apply(self, y, cycle, t=None):
-	# 	t  = np.arange(y.size) if (t is None) else t
-	# 	y1 =
-	# 	for u in np.sort( np.unique(cycle) ):
-	# 		i  = cycle==u
-	# 		n  = i.sum()
-	# 		a  = np.linspace(self.a0, self.a1, n)
-	# 		b  = np.linspace(self.b0, self.b1, n)
-	# 		vv = a * t[i] + b
-	# 		yy = y[i] + vv
-	#
-	#
-	# 	v  = self.a * t + self.b
-	# 	return y + v
-	#
-	#
-	# # def apply(self, y, t=None):
-	# # 	t  = np.arange(y.size) if (t is None) else t
-	# # 	v  = self.a * t + self.b
-	# # 	return y + v
+	def __init__(self, slope=None, intercept=None):
+		self.a  = slope
+		self.b  = intercept
+		
+	@property
+	def Q(self):
+		return self.a.size
+	
+	def apply(self, y0, t0):
+		Q0   = y0.size
+		if self.Q == Q0:
+			a0,b0 = self.a, self.b
+		else:
+			from .. util import interp1d
+			a0    = interp1d(self.a, Q0)
+			b0    = interp1d(self.b, Q0)
+		v0  = (a0 * t0) + b0
+		return y0 + v0
