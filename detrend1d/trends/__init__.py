@@ -1,5 +1,5 @@
 
 
-from . single import Linear
-from . import wcv
+from . single import Linear, LinearWithFixedIntercept
+from . import wc
 

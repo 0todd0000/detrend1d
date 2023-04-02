@@ -6,8 +6,9 @@ import os,pathlib
 # from . import cls
 # from . import models
 from . import datum
-from . import rand
+from . import random
 from . import trends
+from . ts import TimeSeries
 
 Datum  = datum.Datum
 
