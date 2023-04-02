@@ -36,6 +36,89 @@ class TimeSeriesGenerator(object):
 		return TimeSeries(t, y)
 
 
+
+class FullCycleCyclicalTimeSeriesGenerator(object):
+	def __init__(self, datum, trend, rng):
+		self.datum      = datum
+		self.trend      = trend
+		self.rng        = rng
+		self.fullcycle  = True
+		
+	def generate(self, durn=10, hz=100, cycledurn_sd=0.05):
+		pass
+		# from . ts import TimeSeries
+		# t,y0 = self.datum.t, self.datum.y
+		# y    = self.trend.apply(y0, t=t)    # apply trend
+		# y   += self.rng.generate( y.size )  # add noise
+		# return TimeSeries(t, y)
+	
+
+class PartCycleCyclicalTimeSeriesGenerator(object):
+	def __init__(self, datum, trend, rng):
+		self.datum      = datum
+		self.trend      = trend
+		self.rng        = rng
+		self.fullcycle  = False
+		
+		# self.durn_var        = None
+		# self.intercycle_durn = None
+		# self.trend           = None
+
+		
+		
+		
+	# def generate(self, durn=10, hz=100, cycledurn_sd=0.05, intercycle_durn=None):
+	# 	from . ts import CyclicalTimeSeries
+	# 	t,y0 = self.datum.t, self.datum.y
+	# 	y    = self.trend.apply(y0, t=t)    # apply trend
+	# 	y   += self.rng.generate( y.size )  # add noise
+	# 	return CyclicalTimeSeries(t, y, c)
+
+	def generate_single_cycle(self, cycledurn_sd=None, t0=0):
+		from . ts import TimeSeries
+		if cycledurn_sd in [None, 0]:
+			t,y0  = t0 + self.datum.t, self.datum.y
+			y     = self.trend.apply(y0, t=t)    # apply trend
+			y    += self.rng.generate( y.size )  # add noise
+		else:
+			pass
+			# cdurn0   = self.t[-1]
+			# dt       = self.t[1] - self.t[0]
+			# cdurn    = cdurn0 + cycledurn_sd * np.random.randn()
+			# n        = round(cdurn / dt)
+			# ti       = np.linspace( 0, self.t[-1], n )
+			# f        = interpolate.interp1d(self.t, self.y)
+			# y        = f(ti)
+			# t        = t0 + np.linspace( 0, cdurn, n )
+		return TimeSeries(t, y)
+
+	# def generate_session_datum(self, durn=10, hz=100, cycledurn_sd=None, intercycle_durn=None):
+	# 	t,y = self.t, self.y
+	# 	dt  = t[1] - t[0]
+	# 	c   = [0]*t.size
+	# 	i   = 0
+	# 	while t[-1] < durn:
+	# 		if cycledurn_sd is None:
+	# 			tt = self.t + t[-1] + dt
+	# 			yy = self.y
+	# 		else:
+	# 			t0       = t[-1] + dt
+	# 			tt,yy    = self.generate_single_cycle( cycledurn_sd, t0 )
+	# 		t  = np.hstack( [t, tt] )
+	# 		y  = np.hstack( [y, yy] )
+	# 		i += 1
+	# 		c += [i] * tt.size
+	# 	b      = t <= durn
+	# 	t,c,y  = t[b], np.array(c)[b], y[b]
+	# 	if self.trend is not None:
+	# 		y  = self.trend.apply(y, t=t)
+	# 	return t,c,y
+
+
+
+
+
+
 #
 #
 # class SingleSessionDatasetGenerator(object):

@@ -8,7 +8,7 @@ import os,pathlib
 from . import datum
 from . import random
 from . import trends
-from . ts import TimeSeries
+from . ts import TimeSeries, CyclicalTimeSeries
 
 Datum  = datum.Datum
 
