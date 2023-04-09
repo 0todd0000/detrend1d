@@ -18,4 +18,4 @@ class DurationModel(object):
 		return self.rand()
 		
 	def rand(self):
-		return self.mean if self.isconstant else (self.mean + self.sd * np.random.rand())
+		return self.mean if self.isconstant else (self.mean + self.sd * np.random.randn())

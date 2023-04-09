@@ -47,6 +47,8 @@ class GaussianRandomFieldGenerator(object):
 		return w * self.amp * self.gen( n )
 
 
+# much easier to implement variable-durations in the CyclicalTimeSeriesGenerator class
+
 # class VariableLengthGaussianRandomFieldGenerator(object):
 # 	def __init__(self, Q=101, Qsd=None, fwhm=25, amp=1, taper=None):
 # 		self._wtaperfn  = None
