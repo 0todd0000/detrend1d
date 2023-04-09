@@ -3,18 +3,13 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
-from rft1d import randn1d
+from . ts import TimeSeries
 
 
-
-class Datum(object):
-	def __init__(self, t, y):
-		self.t               = t
-		self.y               = y
-
-	def plot(self, ax=None):
-		ax = plt.gca() if (ax is None) else ax
-		ax.plot(self.t, self.y)
+class Datum(TimeSeries):
+	def set_durn(self, x):
+		obj = self.interp_durn(x)
+		super().__init__(obj.t, obj.y)
 
 	
 class _ExperimentalDatum( Datum ):

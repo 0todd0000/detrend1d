@@ -1,52 +1,6 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-
-
-def _sigmoid(Q, q0=0, q1=5, x0=0, x1=1):
-	z          = np.zeros(Q)
-	zz         = 6
-	z[:q0]     = -zz
-	z[q1:]     = +zz
-	z[q0:q1]   = np.linspace(-zz, zz, q1-q0)
-	y          = 1.0 / (1.0 + np.exp(-1.0 * z))
-	y          = (y - y[0]) / (y[-1]-y[0])
-	y          = x0 + (y * (x1-x0))
-	return y
-
-
-def _sigmoid_taper(Q, taper_rel):
-	taper   = max( round( taper_rel * Q ), 1 )
-	w0      = _sigmoid(Q, 0, taper, 0, 1)
-	w1      = _sigmoid(Q, Q-taper-1, Q-1, 1, 0)
-	w       = w0 * w1
-	return w
-
-
-
-class GaussianRandomFieldGenerator(object):
-	def __init__(self, fwhm=25, amp=1, taper=None):
-		self._wtaperfn  = None
-		self.fwhm       = fwhm
-		self.amp        = amp
-		self.gen        = None
-		self.taper      = taper
-		self._init_generator()
-		self._init_taper()
-		
-	def _init_generator(self):
-		import rft1d
-		self.gen = lambda x: rft1d.randn1d(1, x, FWHM=self.fwhm, pad=False)
-		
-	def _init_taper(self):
-		if self.taper is not None:
-			self._wtaperfn = lambda x: _sigmoid_taper( x, self.taper )
-	
-	def generate(self, n):
-		w = 1 if self.taper is None else self._wtaperfn(n)
-		return w * self.amp * self.gen( n )
-
-
+from .. ts import TimeSeries, NullTimeSeries
 
 
 
@@ -57,7 +11,7 @@ class TimeSeriesGenerator(object):
 		self.rng        = rng
 		
 	def generate(self):
-		from . ts import TimeSeries
+		from .. ts import TimeSeries
 		t,y0 = self.datum.t, self.datum.y
 		y    = self.trend.apply(y0, t=t)    # apply trend
 		y   += self.rng.generate( y.size )  # add noise
@@ -82,18 +36,34 @@ class FullCycleCyclicalTimeSeriesGenerator(object):
 	
 
 class PartCycleCyclicalTimeSeriesGenerator(object):
-	def __init__(self, datum, trend, rng):
+	def __init__(self, datum, trend, rng, cd=None, icd=None):
+		'''
+		cd  : cycle duration --- dtr.model.DurationModel( mean=1, sd=0 )
+		icd : intercycle duration --- dtr.model.DurationModel( mean=0.3, sd=0 )
+		'''
+		self.cd         = None
 		self.datum      = datum
-		self.trend      = trend
+		self.icd        = None
+		# self.fullcycle  = False
 		self.rng        = rng
-		self.fullcycle  = False
-		
-		# self.durn_var        = None
-		# self.intercycle_durn = None
-		# self.trend           = None
+		self.trend      = trend
+		self.ts         = None
+		self._init_durn_models( cd, icd )
 
-		
-		
+
+	def __init_durn_model(self, x, default=1):
+		from . durn import DurationModel
+		if x is None:
+			model = DurationModel( default, 0 )
+		elif isinstance(x, (int,float)):
+			model = DurationModel( x, 0 )
+		elif isinstance(x, DurationModel):
+			model = x
+		return model
+	
+	def _init_durn_models(self, cd, icd):
+		self.cd      = self.__init_durn_model( cd,  default=self.datum.durn )
+		self.icd     = self.__init_durn_model( icd, default=0 )
 		
 	# def generate(self, durn=10, hz=100, cycledurn_sd=0.05, intercycle_durn=None):
 	# 	from . ts import CyclicalTimeSeries
@@ -102,47 +72,109 @@ class PartCycleCyclicalTimeSeriesGenerator(object):
 	# 	y   += self.rng.generate( y.size )  # add noise
 	# 	return CyclicalTimeSeries(t, y, c)
 
-	def generate_single_cycle(self, cycledurn_sd=None, t0=0):
-		from . ts import TimeSeries
-		if cycledurn_sd in [None, 0]:
-			t,y0  = t0 + self.datum.t, self.datum.y
-			y     = self.trend.apply(y0, t)    # apply trend
-			y    += self.rng.generate( y.size )  # add noise
+	@property
+	def append_enabled(self):
+		return self.ts is not None
+	
+	def enable_append(self, b=True):
+		if b:
+			self.ts   = TimeSeries()
 		else:
-			pass
-			# cdurn0   = self.t[-1]
-			# dt       = self.t[1] - self.t[0]
-			# cdurn    = cdurn0 + cycledurn_sd * np.random.randn()
-			# n        = round(cdurn / dt)
-			# ti       = np.linspace( 0, self.t[-1], n )
-			# f        = interpolate.interp1d(self.t, self.y)
-			# y        = f(ti)
-			# t        = t0 + np.linspace( 0, cdurn, n )
-		return TimeSeries(t, y)
-
-	def generate(self, durn=10, hz=100, cycledurn_sd=None, intercycle_durn=None):
-		t,y = self.t, self.y
-		dt  = t[1] - t[0]
-		c   = [0]*t.size
-		i   = 0
-		while t[-1] < durn:
-			if cycledurn_sd is None:
-				tt = self.t + t[-1] + dt
-				yy = self.y
-			else:
-				t0       = t[-1] + dt
-				tt,yy    = self.generate_single_cycle( cycledurn_sd, t0 )
-			t  = np.hstack( [t, tt] )
-			y  = np.hstack( [y, yy] )
-			i += 1
-			c += [i] * tt.size
-		b      = t <= durn
-		t,c,y  = t[b], np.array(c)[b], y[b]
-		if self.trend is not None:
-			y  = self.trend.apply(y, t=t)
-		return t,c,y
+			self.ts   = None
+	
+	def generate_single_cycle(self):
+		cdurn   = self.cd.value   # current cycle duration
+		icdurn  = self.icd.value  # current inter-cycle duration
+		datum   = self.datum if (cdurn == self.datum.durn) else self.datum.interp_durn( cdurn )
+		t       = self.datum.t
+		y       = self.trend.apply(self.datum.y, t) # apply trend
+		y      += self.rng.generate( y.size )       # add noise
+		ts      = TimeSeries(t, y)
+		if self.append_enabled:
+			if (icdurn>0) and not self.ts.isempty:
+				nts    = NullTimeSeries( icdurn, hz=self.ts.hz )
+				self.ts.append( nts )
+			self.ts.append( ts )
+		return ts
 
 
+	# def generate_single_cycle(self, cycledurn_sd=None):
+	# 	if cycledurn_sd in [None, 0]:
+	# 		datum  = self.datum
+	# 	else:
+	# 		durn   = self.datum.durn + cycledurn_sd * np.random.randn()
+	# 		datum  = self.datum.interp_durn( durn )
+	# 	t  = self.datum.t
+	# 	y  = self.trend.apply(self.datum.y, t) # apply trend
+	# 	y += self.rng.generate( y.size )       # add noise
+	# 	ts = TimeSeries(t, y)
+	# 	if self.append_enabled:
+	# 		if not self.ts.isempty:
+	# 			durn   = self.icd['mean'] + self.icd['sd'] * np.random.randn()
+	# 			nts    = NullTimeSeries( durn, hz=self.ts.hz )
+	# 			self.ts.append( nts )
+	# 		self.ts.append( ts )
+	# 	return ts
+
+
+	# def generate_single_cycle(self, cycledurn_sd=None, t0=None, astimeseries=True):
+	# 	from .. ts import TimeSeries
+	# 	t0        = 0 if (t0 is None) else t0
+	# 	if cycledurn_sd in [None, 0]:
+	# 		t,y0  = t0 + self.datum.t, self.datum.y
+	# 		y     = self.trend.apply(y0, t)    # apply trend
+	# 		y    += self.rng.generate( y.size )  # add noise
+	# 	else:
+	# 		pass
+	# 		# cdurn0   = self.t[-1]
+	# 		# dt       = self.t[1] - self.t[0]
+	# 		# cdurn    = cdurn0 + cycledurn_sd * np.random.randn()
+	# 		# n        = round(cdurn / dt)
+	# 		# ti       = np.linspace( 0, self.t[-1], n )
+	# 		# f        = interpolate.interp1d(self.t, self.y)
+	# 		# y        = f(ti)
+	# 		# t        = t0 + np.linspace( 0, cdurn, n )
+	# 	if astimeseries:
+	# 		return TimeSeries(t, y)
+	# 	else:
+	# 		return t, y
+
+
+
+	def generate(self, durn=10, hz=100):
+		self.reset()
+		self.enable_append(True)
+		self.generate_single_cycle()
+		while self.ts.t1 < durn:
+			self.generate_single_cycle()
+		ts    = self.ts.interp_hz( hz )
+		ts,_  = ts.split_at_time( durn )
+		return ts
+
+	# def generate(self, durn=10, hz=100):
+	# 	t,y = self.t, self.y
+	# 	dt  = t[1] - t[0]
+	# 	c   = [0]*t.size
+	# 	i   = 0
+	# 	while t[-1] < durn:
+	# 		if cycledurn_sd is None:
+	# 			tt = self.t + t[-1] + dt
+	# 			yy = self.y
+	# 		else:
+	# 			t0       = t[-1] + dt
+	# 			tt,yy    = self.generate_single_cycle( cycledurn_sd, t0 )
+	# 		t  = np.hstack( [t, tt] )
+	# 		y  = np.hstack( [y, yy] )
+	# 		i += 1
+	# 		c += [i] * tt.size
+	# 	b      = t <= durn
+	# 	t,c,y  = t[b], np.array(c)[b], y[b]
+	# 	if self.trend is not None:
+	# 		y  = self.trend.apply(y, t=t)
+	# 	return t,c,y
+
+	def reset(self):
+		self.ts = None
 
 
 
@@ -398,5 +430,4 @@ class PartCycleCyclicalTimeSeriesGenerator(object):
 # # #
 # # # 	def set_sd(self, x):
 # # # 		self.sd   = float(x)
-
 
