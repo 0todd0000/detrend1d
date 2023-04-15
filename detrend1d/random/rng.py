@@ -36,7 +36,7 @@ class GaussianRandomFieldGenerator(object):
 
 	def _init_generator(self):
 		import rft1d
-		self.gen = lambda x: rft1d.randn1d(1, x, FWHM=self.fwhm, pad=False)
+		self.gen = lambda x: rft1d.randn1d(1, x, FWHM=self.fwhm, pad=True)
 
 	def _init_taper(self):
 		if self.taper is not None:

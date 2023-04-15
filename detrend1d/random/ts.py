@@ -163,7 +163,7 @@ class CyclicalTimeSeriesGenerator(object):
 			self.cts.append( ts )
 		return ts
 
-	def generate(self, durn=10, hz=100):
+	def generate(self, durn=10, hz=100, crop=True):
 		self.reset()
 		self.enable_append(True)
 		self.generate_single_cycle()
@@ -171,7 +171,8 @@ class CyclicalTimeSeriesGenerator(object):
 			self.generate_single_cycle()
 		cts = self.cts
 		cts   = self.cts.interp_hz( hz )
-		cts,_ = cts.split_at_time( durn )
+		if crop:
+			cts,_ = cts.split_at_time( durn )
 		return cts
 
 	def reset(self):
