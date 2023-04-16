@@ -113,15 +113,30 @@ class Linear(object):
 	'''
 	
 	def __init__(self, slope=None, intercept=None):
-		self.a  = None if (slope is None) else np.asarray(slope)
-		self.b  = None if (intercept is None) else np.asarray(intercept)
+		self._beta = None       # model parameters
+		self._n    = None       # number of time series nodes (used only during fitting)
+		self._t    = None       # time vector (used only during fitting)
+		self.a     = None if (slope is None) else np.asarray(slope)
+		self.b     = None if (intercept is None) else np.asarray(intercept)
 		
+	# @property
+	# def _Xi(self):  # pseudo-inverse of design matrix (used only during fitting)
+	# 	return np.linalg.pinv(self._X)
+	
 	@property
-	def isscalar(self):
-		return self.a.size == 1
-	@property
-	def Q(self):
-		return self.a.size
+	def _X(self):   # design matrix
+		n      = self._n
+		X      = np.zeros( (n, 2) )
+		X[:,0] = 1
+		X[:,1] = self._t
+		return X
+
+	# @property
+	# def isscalar(self):
+	# 	return self.a.size == 1
+	# @property
+	# def Q(self):
+	# 	return self.a.size
 	
 	# def apply(self, y, t=None):
 	# 	t  = np.arange(y.size) if (t is None) else t
@@ -129,15 +144,29 @@ class Linear(object):
 	# 	return y + v
 
 	def apply(self, t, y):
-		if self.isscalar or (self.Q == y.size):
-			a,b   = self.a, self.b
-		else:
-			from .. util import interp1d
-			a     = interp1d(self.a, y.size)
-			b     = interp1d(self.b, y.size)
+		a,b   = self.a, self.b
 		dy  = (a * t) + b
 		return y + dy
+		# if self.isscalar or (self.Q == y.size):
+		#
+		# else:
+		# 	from .. util import interp1d
+		# 	a     = interp1d(self.a, y.size)
+		# 	b     = interp1d(self.b, y.size)
+		# dy  = (a * t) + b
+		# return y + dy
 		
+	def fit(self, t, y):
+		self._n    = t.size
+		self._t    = t
+		self._beta = np.linalg.pinv(self._X) @ y
+		self.a     = self._beta[0]
+		self.b     = self._beta[1]
+		self.isfit = True
+
+
+	
+	
 	def plot(self, ax=None, t0=0, t1=10, n=51):
 		ax    = plt.gca() if (ax is None) else ax
 		t     = np.linspace(t0, t1, n)
