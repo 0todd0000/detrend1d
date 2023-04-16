@@ -6,6 +6,7 @@ from . ts import TimeSeries, CyclicalTimeSeries, NullTimeSeries
 from . import datum
 from . import random
 from . import trends
+from . import util
 
 
 Datum  = datum.Datum
