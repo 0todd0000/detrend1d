@@ -109,3 +109,5 @@ class LinearFixedIntercept( Linear ):
 # 		t     = np.linspace(t0, t1, n)
 # 		y     = self.apply(t, np.zeros(n))
 # 		ax.plot(t, y)
+#
+		
