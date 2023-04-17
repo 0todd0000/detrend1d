@@ -105,6 +105,31 @@ from matplotlib import pyplot as plt
 # 		self.isfit = True
 
 
+class Fit(object):
+	def __init__(self, t, y, fnX):
+		# self.fnX  = fnX
+		self.X    = None
+		self.beta = None
+		self.fnX  = fnX
+		self.t    = t
+		self.y    = y
+		self._fit()
+		
+	@property
+	def yhat(self):
+		return self.X @ self.beta
+	
+	def _fit(self):
+		self.X    = self.fnX( self.t )
+		self.beta = np.linalg.pinv(self.X) @ self.y
+		
+	def plot(self, ax=None, **kwargs):
+		ax    = plt.gca() if (ax is None) else ax
+		ax.plot(self.t, self.yhat)
+		
+		
+
+
 
 class Linear(object):
 	
@@ -113,9 +138,10 @@ class Linear(object):
 	'''
 	
 	def __init__(self, slope=None, intercept=None):
-		self._beta = None       # model parameters
-		self._n    = None       # number of time series nodes (used only during fitting)
-		self._t    = None       # time vector (used only during fitting)
+		self._fit   = None      # fitted model parameters
+		# self._beta  = None      # model parameters
+		# self._n    = None       # number of time series nodes (used only during fitting)
+		# self._t    = None       # time vector (used only during fitting)
 		self.a     = None if (slope is None) else np.asarray(slope)
 		self.b     = None if (intercept is None) else np.asarray(intercept)
 		
@@ -123,14 +149,29 @@ class Linear(object):
 	# def _Xi(self):  # pseudo-inverse of design matrix (used only during fitting)
 	# 	return np.linalg.pinv(self._X)
 	
+	# @property
+	# def _yhat(self):  # fits (used only during fitting)
+	# 	return self._X @ self.beta
+
+	# @property
+	# def _X(self):   # design matrix
+	# 	n      = self._n
+	# 	X      = np.zeros( (n, 2) )
+	# 	X[:,0] = 1
+	# 	X[:,1] = self._t
+	# 	return X
+
 	@property
-	def _X(self):   # design matrix
-		n      = self._n
+	def isfit(self):
+		return self._fit is not None
+	
+	@staticmethod
+	def _X(t):   # design matrix
+		n      = t.size
 		X      = np.zeros( (n, 2) )
 		X[:,0] = 1
-		X[:,1] = self._t
+		X[:,1] = t
 		return X
-
 	# @property
 	# def isscalar(self):
 	# 	return self.a.size == 1
@@ -156,13 +197,31 @@ class Linear(object):
 		# dy  = (a * t) + b
 		# return y + dy
 		
+	# def detrend(self, t, y):
+	# 	self.fit(t, y)
+		
+	
+	
+	# def fit(self, t, y):
+	# 	self._n    = t.size
+	# 	self._t    = t
+	# 	self._beta = np.linalg.pinv(self._X) @ y
+	# 	self.a     = self._beta[0]
+	# 	self.b     = self._beta[1]
+	# 	self.isfit = True
+
 	def fit(self, t, y):
-		self._n    = t.size
-		self._t    = t
-		self._beta = np.linalg.pinv(self._X) @ y
-		self.a     = self._beta[0]
-		self.b     = self._beta[1]
-		self.isfit = True
+		self._fit   = Fit(t, y, self._X)
+		# _fit.set_beta(  np.linalg.pinv(self._X) @ y )
+		# # n     = t.size
+		# # beta  = np.linalg.pinv(self._X) @ y
+		#
+		# self._n    = t.size
+		# self._t    = t
+		# self._beta = np.linalg.pinv(self._X) @ y
+		# self.a     = self._beta[0]
+		# self.b     = self._beta[1]
+		# self.isfit = True
 
 
 	
