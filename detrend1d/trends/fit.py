@@ -68,34 +68,29 @@ class CyclicalFit(object):
 		self.y        = None
 
 
-	@property
-	def _yhat(self):
-		k = self.constant
-		return [X @ b + k   for X,b in zip(self.XX, self.beta.T)]
-	@property
-	def yhat(self):
-		return np.hstack( self._yhat )
-	@property
-	def yhat_stacked(self):
-		return np.array( self._yhat )
-
-	
 	def fit(self, t, y, c):
-		ts            = np.vstack(  [ t[c==u]  for u in np.unique(c) ]  )
-		ys            = np.vstack(  [ y[c==u]  for u in np.unique(c) ]  )
-		XX            = np.array(   [ self.fnX(tt) for tt in ts.T ]  )
-		k             = self.constant
-		self.beta     = np.array(  [np.linalg.pinv( X ) @ (yy - k)  for X,yy in zip(XX, ys.T)]  ).T
-		# self.beta     = np.array(  [np.linalg.pinv( make_X(tt) ) @ (yy-k)   for tt,yy in zip(ts.T, ys.T)]  ).T
-		self.X        = XX.mean( axis=0 )
-		self.t        = t
-		self.y        = y
-		self.c        = c
-		self.XX       = XX
-		self.tt       = ts
-		self.yy       = ys
-		self.isfitted = True
-		
+		ts                = np.vstack(  [ t[c==u]  for u in np.unique(c) ]  )
+		ys                = np.vstack(  [ y[c==u]  for u in np.unique(c) ]  )
+		XX                = np.array(   [ self.fnX(tt) for tt in ts.T ]  )
+		k                 = self.constant
+		beta              = np.array(  [np.linalg.pinv( X ) @ (yy - k)  for X,yy in zip(XX, ys.T)]  ).T
+		yhats             = np.array([(X @ b) + k   for X,b in zip(XX, beta.T)]).T
+		yhat              = np.zeros(y.size)
+		for u,yh in zip(np.unique(c), yhats):
+			yhat[c==u] = yh
+		# assemble results:
+		self.t            = t
+		self.y            = y
+		self.c            = c
+		self.ts           = ts
+		self.ys           = ys
+		self.XX           = XX
+		self.X            = XX.mean( axis=0 )
+		self.beta         = beta
+		self.yhat         = yhat
+		self.yhat_stacked = yhats
+		self.isfitted     = True
+
 	
 	def plot(self, ax=None, **kwargs):
 		if self.isfitted:
