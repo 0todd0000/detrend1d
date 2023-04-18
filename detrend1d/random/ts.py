@@ -13,7 +13,7 @@ class TimeSeriesGenerator(object):
 	def generate(self):
 		from .. ts import TimeSeries
 		t,y0 = self.datum.t, self.datum.y
-		y    = self.trend.apply(y0, t=t)    # apply trend
+		y    = self.trend.apply(t, y0)    # apply trend
 		y   += self.rng.generate( y.size )  # add noise
 		return TimeSeries(t, y)
 
@@ -153,7 +153,7 @@ class CyclicalTimeSeriesGenerator(object):
 		t       = datum.t
 		if self.append_enabled and not self.cts.isempty:
 			t  += self.cts.t[-1]
-		y       = self.trend.apply(datum.y, t) # apply trend
+		y       = self.trend.apply(t, datum.y) # apply trend
 		y      += self.rng.generate( y.size )       # add noise
 		ts      = TimeSeries(t, y)
 		if self.append_enabled:

@@ -134,11 +134,21 @@ class CyclicalTimeSeries(TimeSeries):
 	def next_label(self):
 		return self.max_label + 1
 	
-	def _get_cycle(self, c, registered=False, time_zeroed=False):
+	# def _get_cycle(self, c, registered=False, time_zeroed=False):
+	# 	ts  = self.segment( self.c == c )
+	# 	if registered:
+	# 		ts   = ts.interp_n(101)
+	# 		ts.t = np.linspace(0, 101, 101)
+	# 	if time_zeroed:
+	# 		ts.t  = ts.t - ts.t[0]
+	# 	return ts
+
+	def _get_cycle(self, c, registered_n=None, time_zeroed=False):
 		ts  = self.segment( self.c == c )
-		if registered:
-			ts   = ts.interp_n(101)
-			ts.t = np.linspace(0, 101, 101)
+		if registered_n is not None:
+			n    = registered_n
+			ts   = ts.interp_n(n)
+			ts.t = np.linspace(0, n, n)
 		if time_zeroed:
 			ts.t  = ts.t - ts.t[0]
 		return ts
@@ -158,6 +168,9 @@ class CyclicalTimeSeries(TimeSeries):
 		self.cf = np.append(self.cf, [label]*nts.n)
 
 	
+	def as_cycle_list(self, registered_n=None):
+		return [self._get_cycle(i+1, registered_n=registered_n, time_zeroed=True) for i in range(self.ncycles)]
+	
 	def interp_hz(self, hz):
 		from scipy import interpolate
 		dt     = 1.0 / hz
@@ -176,7 +189,7 @@ class CyclicalTimeSeries(TimeSeries):
 	# 	trend.fit( self.t, self.y )
 	# 	return DetrendedTimeSeries( self.t, self.y, trend )
 
-	def plot_cycles(self, ax=None, registered=False, cmap=None):
+	def plot_cycles(self, ax=None, registered_n=None, cmap=None, colorbar=False):
 		n      = self.ncycles
 		if n == 0:
 			return
@@ -184,8 +197,13 @@ class CyclicalTimeSeries(TimeSeries):
 		cmap   = plt.cm.jet if (cmap is None) else cmap
 		colors = cmap( np.linspace(0, 1, n) )
 		for i,color in enumerate(colors):
-			ts = self._get_cycle(i+1, registered=registered, time_zeroed=True)
+			ts = self._get_cycle(i+1, registered_n=registered_n, time_zeroed=True)
 			ts.plot( ax=ax, color=color )
+		if colorbar:
+			norm   = plt.Normalize(vmin=0, vmax=n)
+			sm     = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+			cb     = plt.colorbar(sm, ax=ax)
+			cb.set_label('Cycle number')
 
 	def split_at_time(self, t):
 		i0            = self.t < t

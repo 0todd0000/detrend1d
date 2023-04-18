@@ -32,6 +32,12 @@ class Linear(_Trend):
 	@property
 	def beta_str(self):
 		return f'{self.beta.shape} array'
+	@property
+	def intercept(self):
+		return self.beta[1]
+	@property
+	def slope(self):
+		return self.beta[0]
 
 	# @property
 	# def Q(self):
