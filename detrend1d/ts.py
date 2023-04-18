@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 class TimeSeries(object):
 	def __init__(self, t=None, y=None):
-		self.t     = []  if t is None else t
-		self.y     = []  if y is None else y
+		self.t     = []  if t is None else np.asarray(t)
+		self.y     = []  if y is None else np.asarray(y)
 		
 	def __repr__(self):
 		s   = f'{self.__class__.__name__}\n'
@@ -84,10 +84,11 @@ class TimeSeries(object):
 		ax = plt.gca() if (ax is None) else ax
 		ax.plot(self.t, self.y, **kwargs)
 
-	def segment(self, b):
+	def segment(self, b, as_timeseries=True):
 		t,y   = self.t[b], self.y[b]
 		ts    = TimeSeries(t, y)
-		ts.__class__ = self.__class__
+		if not as_timeseries:
+			ts.__class__ = self.__class__
 		return ts
 	
 	def split_at_time(self, t):
@@ -113,8 +114,8 @@ class NullTimeSeries(TimeSeries):
 class CyclicalTimeSeries(TimeSeries):
 	def __init__(self, t=None, y=None, c=None, cf=None):
 		super().__init__(t, y)
-		self.c  = []  if c  is None else c   # cycle labels
-		self.cf = []  if cf is None else cf  # full-cycle labels (e.g. GRF)
+		self.c  = []  if c  is None else np.asarray(c)   # cycle labels
+		self.cf = []  if cf is None else np.asarray(cf)  # full-cycle labels (e.g. GRF)
 		
 	def __repr__(self):
 		s   = f'{self.__class__.__name__}\n'
@@ -143,9 +144,9 @@ class CyclicalTimeSeries(TimeSeries):
 	# 		ts.t  = ts.t - ts.t[0]
 	# 	return ts
 
-	def _get_cycle(self, c, registered_n=None, time_zeroed=False, full_cycle=False):
+	def _get_cycle(self, c, registered_n=None, time_zeroed=False, full_cycle=False, as_timeseries=True):
 		_c  = self.cf if full_cycle else self.c
-		ts  = self.segment( _c == c )
+		ts  = self.segment( _c == c, as_timeseries=as_timeseries )
 		if registered_n is not None:
 			n    = registered_n
 			ts   = ts.interp_n(n)
@@ -187,30 +188,50 @@ class CyclicalTimeSeries(TimeSeries):
 
 	
 	def interp_hz(self, hz):
+		from math import ceil
 		from scipy import interpolate
 		yi,ci,cfi = [], [], []
 		for i in range(self.ncycles):
-			ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True)
-			tsi   = ts.interp_hz(hz)
-			yi   += list(tsi.y)
-			cfi  += [i+1] * yi.size
+			ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True, as_timeseries=True)
+			# print( type(ts), type(self) )
 			
-
-			n0 = (self.c == (i+1)).sum()
-			n1 = (self.cf == (i+1)).sum()
+			tsi    = ts.interp_hz(hz)
+			yi    += list(tsi.y)
+			cfi   += [i+1] * tsi.n
+		
+		
+			# append new cycle labels:
+			n      = (self.c == (i+1)).sum()
+			nf     = (self.cf == (i+1)).sum()
+			if n==nf:
+				_ci = [i+1] * tsi.n
+			else:
+				nfi   = tsi.n
+				ni    = int( ceil( n/nf * nfi ) )
+				_ci   = np.zeros(tsi.n, dtype=int) 
+				_ci[:ni+1] = i+1
+				_ci   = list( _ci )
+			ci   += _ci
 			
-
-
-		dt     = 1.0 / hz
-		ti     = np.arange(self.t0, self.t1, dt)
-		fy     = interpolate.interp1d(self.t, self.y)
-		fc     = interpolate.interp1d(self.t, self.c)
-		fcf    = interpolate.interp1d(self.t, self.cf)
-		yi     = fy(ti)
-		ci     = np.asarray(np.round( fc(ti) ), dtype=int)
-		cfi    = np.asarray(np.round( fcf(ti) ), dtype=int)
+		# print( len(yi), len(cfi), len(ci) )
+		
+		ti     = np.arange(0, len(yi)) / hz
 		cts    = CyclicalTimeSeries(ti, yi, ci, cfi)
 		return cts
+
+
+
+
+		# dt     = 1.0 / hz
+		# ti     = np.arange(self.t0, self.t1, dt)
+		# fy     = interpolate.interp1d(self.t, self.y)
+		# fc     = interpolate.interp1d(self.t, self.c)
+		# fcf    = interpolate.interp1d(self.t, self.cf)
+		# yi     = fy(ti)
+		# ci     = np.asarray(np.round( fc(ti) ), dtype=int)
+		# cfi    = np.asarray(np.round( fcf(ti) ), dtype=int)
+		# cts    = CyclicalTimeSeries(ti, yi, ci, cfi)
+		# return cts
 	
 	
 	# def detrend(self, trend):
@@ -238,7 +259,7 @@ class CyclicalTimeSeries(TimeSeries):
 		i1            = np.logical_not( i0 )
 		t0,y0,c0,cf0  = self.t[i0], self.y[i0], self.c[i0], self.cf[i0]
 		t1,y1,c1,cf1  = self.t[i1], self.y[i1], self.c[i1], self.cf[i1]
-		cts0,cts1     = CyclicalTimeSeries(t0, y0, c0, cf1), CyclicalTimeSeries(t1, y1, c1, cf1)
+		cts0,cts1     = CyclicalTimeSeries(t0, y0, c0, cf0), CyclicalTimeSeries(t1, y1, c1, cf1)
 		return cts0, cts1
 
 

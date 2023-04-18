@@ -161,6 +161,8 @@ class CyclicalTimeSeriesGenerator(object):
 				nts    = NullTimeSeries( icdurn, hz=self.cts.hz )
 				self.cts.append_null( nts )
 			self.cts.append( ts )
+			# cts = self.cts
+			# print( cts.n, cts.c.size, cts.cf.size )
 		return ts
 
 	def generate(self, durn=10, hz=100, crop=True):
@@ -169,7 +171,7 @@ class CyclicalTimeSeriesGenerator(object):
 		self.generate_single_cycle()
 		while self.cts.t1 < durn:
 			self.generate_single_cycle()
-		# cts = self.cts
+		cts = self.cts
 		cts = self.cts.interp_hz( hz )
 		if crop:
 			cts,_ = cts.split_at_time( durn )
