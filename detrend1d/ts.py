@@ -143,8 +143,9 @@ class CyclicalTimeSeries(TimeSeries):
 	# 		ts.t  = ts.t - ts.t[0]
 	# 	return ts
 
-	def _get_cycle(self, c, registered_n=None, time_zeroed=False):
-		ts  = self.segment( self.c == c )
+	def _get_cycle(self, c, registered_n=None, time_zeroed=False, full_cycle=False):
+		_c  = self.cf if full_cycle else self.c
+		ts  = self.segment( _c == c )
 		if registered_n is not None:
 			n    = registered_n
 			ts   = ts.interp_n(n)
@@ -171,8 +172,35 @@ class CyclicalTimeSeries(TimeSeries):
 	def as_cycle_list(self, registered_n=None):
 		return [self._get_cycle(i+1, registered_n=registered_n, time_zeroed=True) for i in range(self.ncycles)]
 	
+	# def interp_hz(self, hz):
+	# 	from scipy import interpolate
+	# 	dt     = 1.0 / hz
+	# 	ti     = np.arange(self.t0, self.t1, dt)
+	# 	fy     = interpolate.interp1d(self.t, self.y)
+	# 	fc     = interpolate.interp1d(self.t, self.c)
+	# 	fcf    = interpolate.interp1d(self.t, self.cf)
+	# 	yi     = fy(ti)
+	# 	ci     = np.asarray(np.round( fc(ti) ), dtype=int)
+	# 	cfi    = np.asarray(np.round( fcf(ti) ), dtype=int)
+	# 	cts    = CyclicalTimeSeries(ti, yi, ci, cfi)
+	# 	return cts
+
+	
 	def interp_hz(self, hz):
 		from scipy import interpolate
+		yi,ci,cfi = [], [], []
+		for i in range(self.ncycles):
+			ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True)
+			tsi   = ts.interp_hz(hz)
+			yi   += list(tsi.y)
+			cfi  += [i+1] * yi.size
+			
+
+			n0 = (self.c == (i+1)).sum()
+			n1 = (self.cf == (i+1)).sum()
+			
+
+
 		dt     = 1.0 / hz
 		ti     = np.arange(self.t0, self.t1, dt)
 		fy     = interpolate.interp1d(self.t, self.y)
