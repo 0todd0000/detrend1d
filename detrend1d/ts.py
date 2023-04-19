@@ -126,6 +126,9 @@ class CyclicalTimeSeries(TimeSeries):
 		return s
 
 	@property
+	def hasnull(self):
+		return not np.all( self.c==self.cf )
+	@property
 	def max_label(self):
 		return 0 if self.isempty else int(max(self.c))
 	@property
@@ -173,6 +176,9 @@ class CyclicalTimeSeries(TimeSeries):
 	def as_cycle_list(self, registered_n=None):
 		return [self._get_cycle(i+1, registered_n=registered_n, time_zeroed=True) for i in range(self.ncycles)]
 	
+	def as_timeseries(self):
+		return TimeSeries(self.t, self.y)
+	
 	# def interp_hz(self, hz):
 	# 	from scipy import interpolate
 	# 	dt     = 1.0 / hz
@@ -187,39 +193,67 @@ class CyclicalTimeSeries(TimeSeries):
 	# 	return cts
 
 	
+	# def interp_hz(self, hz):
+	# 	from math import ceil
+	# 	from scipy import interpolate
+	# 	yi,ci,cfi = [], [], []
+	# 	for i in range(self.ncycles):
+	# 		ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True, as_timeseries=True)
+	# 		# print( type(ts), type(self) )
+	#
+	# 		tsi    = ts.interp_hz(hz)
+	# 		yi    += list(tsi.y)
+	# 		cfi   += [i+1] * tsi.n
+	#
+	#
+	# 		# append new cycle labels:
+	# 		n      = (self.c == (i+1)).sum()
+	# 		nf     = (self.cf == (i+1)).sum()
+	# 		if n==nf:
+	# 			_ci = [i+1] * tsi.n
+	# 		else:
+	# 			nfi   = tsi.n
+	# 			ni    = int( ceil( n/nf * nfi ) )
+	# 			_ci   = np.zeros(tsi.n, dtype=int)
+	# 			_ci[:ni+1] = i+1
+	# 			_ci   = list( _ci )
+	# 		ci   += _ci
+	#
+	# 	# print( len(yi), len(cfi), len(ci) )
+	#
+	# 	ti     = np.arange(0, len(yi)) / hz
+	# 	cts    = CyclicalTimeSeries(ti, yi, ci, cfi)
+	# 	return cts
+
+
+	# def interp_hz(self, hz, th=0):
+	# 	from scipy.ndimage import label
+	# 	yi,cfi    = [], []
+	# 	for i in range(self.ncycles):
+	# 		ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True, as_timeseries=True)
+	# 		tsi   = ts.interp_hz(hz)
+	# 		yi   += list(tsi.y)
+	# 		cfi  += [i+1] * tsi.n
+	# 	ti        = np.arange(0, len(yi)) / hz
+	# 	yi        = np.array( yi )
+	# 	ci        = label( yi>th )[0] if self.hasnull else np.array( cfi )
+	# 	cfi       = np.array( cfi )
+	# 	return CyclicalTimeSeries(ti, yi, ci, cfi)
+
+
 	def interp_hz(self, hz):
-		from math import ceil
 		from scipy import interpolate
-		yi,ci,cfi = [], [], []
-		for i in range(self.ncycles):
-			ts    = self._get_cycle(i+1, registered_n=None, time_zeroed=True, full_cycle=True, as_timeseries=True)
-			# print( type(ts), type(self) )
-			
-			tsi    = ts.interp_hz(hz)
-			yi    += list(tsi.y)
-			cfi   += [i+1] * tsi.n
-		
-		
-			# append new cycle labels:
-			n      = (self.c == (i+1)).sum()
-			nf     = (self.cf == (i+1)).sum()
-			if n==nf:
-				_ci = [i+1] * tsi.n
-			else:
-				nfi   = tsi.n
-				ni    = int( ceil( n/nf * nfi ) )
-				_ci   = np.zeros(tsi.n, dtype=int) 
-				_ci[:ni+1] = i+1
-				_ci   = list( _ci )
-			ci   += _ci
-			
-		# print( len(yi), len(cfi), len(ci) )
-		
-		ti     = np.arange(0, len(yi)) / hz
-		cts    = CyclicalTimeSeries(ti, yi, ci, cfi)
-		return cts
-
-
+		from scipy.ndimage import label
+		dt     = 1.0 / hz
+		ti     = np.arange(self.t0, self.t1, dt)
+		yi     = interpolate.interp1d(self.t, self.y)(ti)
+		cfi    = interpolate.interp1d(self.t, self.cf)(ti)
+		if self.hasnull:
+			bi = interpolate.interp1d(self.t, self.c>0)(ti)
+			ci = label( bi )[0]
+		else:
+			ci = cfi
+		return CyclicalTimeSeries(ti, yi, ci, cfi)
 
 
 		# dt     = 1.0 / hz

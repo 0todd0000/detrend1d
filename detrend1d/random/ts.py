@@ -171,11 +171,11 @@ class CyclicalTimeSeriesGenerator(object):
 		self.generate_single_cycle()
 		while self.cts.t1 < durn:
 			self.generate_single_cycle()
-		cts = self.cts
-		cts = self.cts.interp_hz( hz )
+		if hz is not None:
+			self.cts   = self.cts.interp_hz( hz )
 		if crop:
-			cts,_ = cts.split_at_time( durn )
-		return cts
+			self.cts,_ = self.cts.split_at_time( durn )
+		return self.cts
 
 	def reset(self):
 		self.ts = None
