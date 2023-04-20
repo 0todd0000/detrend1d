@@ -68,7 +68,30 @@ class CyclicalFit(object):
 		self.y        = None
 
 
+	def fit_registered(self, t, y):
+		J,Q       = y.shape
+		k         = self.constant
+		beta      = []
+		yhat      = []
+		XX        = []
+		for q in range(Q):
+			tt,yy = t[:,q], y[:,q]
+			X     = self.fnX(tt)
+			b     = np.linalg.pinv( X ) @ (yy - k)
+			yh    = (X @ b) + k
+			XX.append( X )
+			beta.append( b )
+			yhat.append( yh )
+		self.XX   = XX
+		self.t    = t
+		self.y    = y
+		self.beta = np.asarray( beta ).T
+		self.yhat = np.asarray( yhat ).T
+			
+
+
 	def fit(self, t, y, c):
+		uc    = np.unique*
 		ts                = np.vstack(  [ t[c==u]  for u in np.unique(c) ]  )
 		ys                = np.vstack(  [ y[c==u]  for u in np.unique(c) ]  )
 		XX                = np.array(   [ self.fnX(tt) for tt in ts.T ]  )

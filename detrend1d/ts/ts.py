@@ -61,16 +61,15 @@ class TimeSeries(object):
 	# 	obj = TimeSeries(t, self.y)
 	# 	obj.__class__ = self.__class__
 	# 	return obj
-	#
-	# def interp_n(self, n):
-	# 	from scipy import interpolate
-	# 	ti   = np.linspace(self.t0, self.t1, n)
-	# 	f    = interpolate.interp1d(self.t, self.y)
-	# 	yi   = f(ti)
-	# 	obj = TimeSeries(ti, yi)
-	# 	obj.__class__ = self.__class__
-	# 	return obj
-	#
+
+	def interp_n(self, n):
+		from scipy import interpolate
+		ti   = np.linspace(self.t0, self.t1, n)
+		f    = interpolate.interp1d(self.t, self.y)
+		yi   = f(ti)
+		ts   = TimeSeries(ti, yi)
+		return ts
+
 	# def interp_hz(self, hz):
 	# 	from scipy import interpolate
 	# 	dt     = 1.0 / hz
