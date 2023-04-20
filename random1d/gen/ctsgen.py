@@ -69,6 +69,7 @@ class RandomCyclicalTimeSeriesGenerator(object):
 			self.cts   = self.cts.interp_hz( hz )
 		if crop:
 			self.cts,_ = self.cts.split_at_time( durn )
+		self.cts.set_true_trend( self.trend )
 		return self.cts
 
 	def reset(self):

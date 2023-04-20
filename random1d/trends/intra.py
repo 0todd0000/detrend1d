@@ -16,6 +16,8 @@ class TrendIntraCycleLinear(_Trend):
 	'''
 	Model:   y(t) = a*t + b
 	'''
+	
+	label         = 'trend_intra'
 
 	def __init__(self, slope=None, intercept=None):
 		# self._fit = CyclicalFit(self._X) # fitted model parameters
@@ -23,13 +25,13 @@ class TrendIntraCycleLinear(_Trend):
 		b         = None if (intercept is None) else np.array(intercept)
 		self.beta = np.vstack( [a, b] )
 
-	@staticmethod
-	def _X(t):   # design matrix
-		n      = t.size
-		X      = np.zeros( (n, 2) )
-		X[:,0] = t
-		X[:,1] = 1
-		return X
+	# @staticmethod
+	# def _X(t):   # design matrix
+	# 	n      = t.size
+	# 	X      = np.zeros( (n, 2) )
+	# 	X[:,0] = t
+	# 	X[:,1] = 1
+	# 	return X
 
 	@property
 	def beta_str(self):
@@ -56,6 +58,17 @@ class TrendIntraCycleLinear(_Trend):
 		b     = interp1d(self.beta[1], y.size)
 		dy    = (a * t) + b
 		return y + dy
+
+	def asarray(self, t, c):
+		yhat   = np.zeros(t.size)
+		for u in np.unique(c):
+			if u==0:
+				continue
+			i  = c==u
+			tt = t[i]
+			yh = self.apply(tt, np.zeros(tt.size))
+			yhat[i] = yh
+		return yhat
 
 	# def fit(self, t, y, c):
 	# 	self._fit.fit(t, y, c)

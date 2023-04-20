@@ -3,6 +3,11 @@ import numpy as np
 
 
 
+def around(x, prec=None):
+	if prec is not None:
+		x = np.around(x, prec)
+	return x
+
 
 def interp1d(y, n=101, **kwargs):
 	from scipy import interpolate

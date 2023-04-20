@@ -6,6 +6,8 @@ from matplotlib import pyplot as plt
 
 class _Trend(object):
 	
+	iscompound       = False
+	
 	def __repr__(self):
 		s  = f'{self.__class__.__name__}\n'
 		s += f'    beta     = {self.beta_str}\n'
@@ -33,6 +35,9 @@ class _Trend(object):
 	# def fit(self, t, y):
 	# 	self._fit.fit(t, y)
 	# 	self.beta = self._fit.beta
+
+	def asarray(self, t):
+		return self.apply(t, np.zeros(t.size))
 
 	def plot(self, ax=None, t0=0, t1=10, n=51, **kwargs):
 		ax    = plt.gca() if (ax is None) else ax

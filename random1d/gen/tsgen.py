@@ -15,7 +15,7 @@ class RandomTimeSeriesGenerator(object):
 		y    = self.trend.apply(t, y0)    # apply trend
 		y   += self.rng.generate( y.size )  # add noise
 		ts   = TimeSeries(t, y)
-		# ts.set_true_trend( self.trend )
+		ts.set_true_trend( self.trend )
 		return ts
 
 

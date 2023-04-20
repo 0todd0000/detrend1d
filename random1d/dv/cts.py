@@ -2,6 +2,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from . ts import TimeSeries
+from .. util import around
 
 
 class CyclicalTimeSeries(TimeSeries):
@@ -70,6 +71,7 @@ class CyclicalTimeSeries(TimeSeries):
 		ti     = np.arange(self.t0, self.t1, dt)
 		yi     = interpolate.interp1d(self.t, self.y)(ti)
 		cfi    = interpolate.interp1d(self.t, self.cf)(ti)
+		cfi    = np.asarray(np.round(cfi), dtype=int)
 		if self.hasnull:
 			bi = interpolate.interp1d(self.t, self.c>0)(ti)
 			ci = label( bi )[0]
@@ -101,3 +103,25 @@ class CyclicalTimeSeries(TimeSeries):
 		cts0,cts1     = CyclicalTimeSeries(t0, y0, c0, cf0), CyclicalTimeSeries(t1, y1, c1, cf1)
 		return cts0, cts1
 
+
+
+	def write_csv(self, fpath, prec=None):
+		t     = around(self.t, prec)
+		y     = around(self.y, prec)
+		c     = self.c
+		cf    = self.cf
+		if self._trend.iscompound:
+			yh0,yh1 = around( self._trend.asarray(t, c), prec )
+			with open(fpath, 'w') as f:
+				f.write('t,y,c,cf,trend_inter,trend_intra\n')
+				for tt,yy,cc,ccf,yyh0,yyh1 in zip(t, y, c, cf, yh0, yh1):
+					f.write( f'{tt},{yy},{cc},{ccf},{yyh0},{yyh1}\n' )
+		else:
+			yhat   = around( self._trend.asarray(t, c), prec )
+			tlabel = self._trend.label
+			with open(fpath, 'w') as f:
+				f.write( f't,y,c,cf,{tlabel}\n')
+				for tt,yy,cc,ccf,yyh in zip(t, y, c, cf, yhat):
+					f.write( f'{tt},{yy},{cc},{ccf},{yyh}\n' )
+				
+				

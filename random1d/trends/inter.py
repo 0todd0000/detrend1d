@@ -18,6 +18,8 @@ class TrendLinear(_Trend):
 	Model:   y(t) = a*t + b
 	'''
 	
+	label         = 'trend_inter'
+	
 	def __init__(self, slope=None, intercept=None):
 		a         = float( slope )
 		b         = float( intercept )

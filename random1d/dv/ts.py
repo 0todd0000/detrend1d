@@ -1,7 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+from .. util import around
 
 
 
@@ -104,21 +104,20 @@ class TimeSeries(object):
 
 
 	def write_csv(self, fpath, prec=None):
-		t,y    = self.t, self.y
-		if prec is not None:
-			t  = np.around(t, prec)
-			y  = np.around(y, prec)
+		t     = around(self.t, prec)
+		y     = around(self.y, prec)
 		if self._trend is None:
 			with open(fpath, 'w') as f:
 				f.write('t,y\n')
 				for tt,yy in zip(t, y):
 					f.write( f'{tt},{yy}\n' )
 		else:
-			pass
-		# 	with open(fpath, 'w') as f:
-		# 		f.write('t,y,true_trend')
-		#
-		# t,y,trend    = self.t,
+			yhat = around( self._trend.asarray(t), prec )
+			with open(fpath, 'w') as f:
+				f.write('t,y,trend\n')
+				for tt,yy,yyh in zip(t, y, yhat):
+					f.write( f'{tt},{yy},{yyh}\n' )
+			
 
 
 

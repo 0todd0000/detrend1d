@@ -1,11 +1,5 @@
 
-
-The "kneeflex.csv" dataset contains mean knee flexion angles during walking from Schwartz et al. (2008)
-
-
-The "vgrf.csv" dataset contains mean vertical ground reaction forces during walking from Pataky et al. (2008)
-- GRF values are arbitrarily scaled up to approximate N units
-
+These example datasets are simulated, but use mean cycles from previously published experimental data. Consider citing the references below.
 
 
 REFERENCES
