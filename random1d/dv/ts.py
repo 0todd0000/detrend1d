@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 
 class TimeSeries(object):
 	def __init__(self, t=None, y=None):
-		self.t     = []  if t is None else np.asarray(t)
-		self.y     = []  if y is None else np.asarray(y)
+		self._trend = None  # true trend used (if any)
+		self.t      = []  if t is None else np.asarray(t)
+		self.y      = []  if y is None else np.asarray(y)
 		
 	def __repr__(self):
 		s   = f'{self.__class__.__name__}\n'
@@ -87,6 +88,10 @@ class TimeSeries(object):
 			ts.__class__ = self.__class__
 		return ts
 	
+	def set_true_trend(self, trend):
+		self._trend   = trend
+	
+	
 	def split_at_time(self, t):
 		i0            = self.t < t
 		i1            = np.logical_not( i0 )
@@ -98,6 +103,22 @@ class TimeSeries(object):
 		return ts0, ts1
 
 
+	def write_csv(self, fpath, prec=None):
+		t,y    = self.t, self.y
+		if prec is not None:
+			t  = np.around(t, prec)
+			y  = np.around(y, prec)
+		if self._trend is None:
+			with open(fpath, 'w') as f:
+				f.write('t,y\n')
+				for tt,yy in zip(t, y):
+					f.write( f'{tt},{yy}\n' )
+		else:
+			pass
+		# 	with open(fpath, 'w') as f:
+		# 		f.write('t,y,true_trend')
+		#
+		# t,y,trend    = self.t,
 
 
 
