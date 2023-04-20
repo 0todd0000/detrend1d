@@ -1,7 +1,9 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
-from . import inter, intra
+# from . import inter, intra
+from . inter import *
+from . intra import *
 
 
 

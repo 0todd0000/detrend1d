@@ -7,6 +7,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from . fit import Fit
 
+__all__  = ['Linear', 'LinearFixedIntercept']
+
 
 
 class _Trend(object):
@@ -35,6 +37,9 @@ class _Trend(object):
 		self.fit(t, y)
 		return y - self.yhat
 
+	def get_fitted(self):
+		return self.yhat
+	
 	def fit(self, t, y):
 		self._fit.fit(t, y)
 		self.beta = self._fit.beta
@@ -59,11 +64,9 @@ class Linear(_Trend):
 	Model:   y(t) = a*t + b
 	'''
 	
-	def __init__(self, slope=None, intercept=None):
-		self._fit = Fit(self._X) # fitted model parameters
-		a         = None if (slope is None) else float(slope)
-		b         = None if (intercept is None) else float(intercept)
-		self.beta = np.array([a, b])
+	def __init__(self):
+		self._fit = Fit( self._X )    # fitted model parameters
+		self.beta = np.array([0, 0])  # slope, intercept
 
 	@staticmethod
 	def _X(t):   # design matrix

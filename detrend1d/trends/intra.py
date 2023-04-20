@@ -10,7 +10,9 @@ from . inter import _Trend
 from . fit import CyclicalFit
 
 
-class Linear(_Trend):
+__all__  = ['IntraCycleLinear']  #, 'IntraCycleLinearFixedIntercept']
+
+class IntraCycleLinear(_Trend):
 	'''
 	Model:   y(t) = a*t + b
 	'''
