@@ -30,32 +30,23 @@ class Linear(_Trend):
 		self.beta  = np.array([0, 0])  # slope, intercept
 		self.fixed = np.array([False, False])
 
-	# def apply(self, t, y):
-	# 	a,b   = self.beta
-	# 	dy  = (a * t) + b
-	# 	return y + dy
-
 
 
 
 
 class LinearFixedIntercept( Linear ):
 
+	'''
+	Model:   y(t) = a*t + b;  b fixed
+	'''
+
 	def __init__(self, intercept=0):
 		self.intercept = float( intercept )
 		super().__init__()
-		
 
 	def _init_beta(self):
 		self.beta  = np.array([0, self.intercept])  # slope, intercept
 		self.fixed = np.array([False, True])
-
-	# @staticmethod
-	# def _X(t):   # design matrix
-	# 	n      = t.size
-	# 	X      = np.zeros( (n, 1) )
-	# 	X[:,0] = t
-	# 	return X
 
 
 

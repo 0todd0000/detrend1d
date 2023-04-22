@@ -17,28 +17,28 @@ class Fit(object):
 		self.y        = None
 		self.yhat     = None
 
-	def _fit(self, y):
+	def _fit(self, X, y):
 		if self._trend.hasfixed:
 			i0,i1 = self._trend.free, self._trend.fixed
-			X0    = self.X[ : , i0 ]        # free-to-vary columns
-			X1    = self.X[ : , i1 ]        # fixed columns
+			X0    = X[ : , i0 ]        # free-to-vary columns
+			X1    = X[ : , i1 ]        # fixed columns
 			b1    = self._trend.beta[ i1 ]  # fixed betas
 			y1    = X1 @ b1                 # constants
 			b0    = np.linalg.pinv(X0) @ (y-y1)  # free-to-vary betas
-			beta  = np.zeros( self.X.shape[1] )  # all parameters
+			beta  = np.zeros( X.shape[1] )  # all parameters
 			beta[i0]  = b0
 			beta[i1]  = b1
 		else:
-			beta  = np.linalg.pinv(self.X) @ y
+			beta  = np.linalg.pinv(X) @ y
 		return beta
 
 	def fit(self, t, y):
 		self.t    = t
 		self.y    = y
 		self.X    = self._trend.get_design_matrix( t )
-		self.beta = self._fit(y)
+		self.beta = self._fit(self.X, y)
 		self.yhat = self.X @ self.beta
-		self._trend.set_beta( self.beta )
+		# self._trend.set_beta( self.beta )
 	
 	def get_detrended(self):
 		return self.y - self.yhat
