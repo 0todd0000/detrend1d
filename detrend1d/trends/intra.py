@@ -7,7 +7,7 @@ Intra-cycle trends
 import numpy as np
 from matplotlib import pyplot as plt
 from . inter import _Trend
-from . fit import CyclicalFit
+from .. fits import CyclicalFit
 
 
 __all__  = ['IntraCycleLinear']  #, 'IntraCycleLinearFixedIntercept']

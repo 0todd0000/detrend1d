@@ -43,7 +43,7 @@ class _Trend(object):
 		return (self._X(t) @ self.beta) + y
 
 	def fit(self, t, y):
-		from . fit import Fit
+		from .. fits import Fit
 		fit   = Fit( self )
 		fit.fit( t, y )
 		# self.set_beta( fit.beta )
