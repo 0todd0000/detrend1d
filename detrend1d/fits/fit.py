@@ -17,10 +17,6 @@ class Fit(object):
 		self.y        = None
 		self.yhat     = None
 
-	# @property
-	# def yhat(self):
-	# 	return self.X @ self.beta # + self.constant
-	
 	def _fit(self, y):
 		if self._trend.hasfixed:
 			i0,i1 = self._trend.free, self._trend.fixed
@@ -36,7 +32,6 @@ class Fit(object):
 			beta  = np.linalg.pinv(self.X) @ y
 		return beta
 
-	
 	def fit(self, t, y):
 		self.t    = t
 		self.y    = y
@@ -56,7 +51,3 @@ class Fit(object):
 		ax    = plt.gca() if (ax is None) else ax
 		ax.pcolor(self.X, **kwargs)
 
-	# def set_constant(self, x):
-	# 	self.constant  = x
-	#
-	#
