@@ -21,7 +21,22 @@ class CyclicalFit(Fit):
 		self.yr       = None  # registered DV
 		self.ym       = None  # registered mean
 		self.yhatr    = None  # fits (registered)
+		self.z        = None  # t statistic
 
+	@staticmethod
+	def _tstat(X, b, y):
+		rank   = np.linalg.matrix_rank
+		eps    = np.finfo(float).eps
+		eij    = y - X @ b                # residuals
+		ss     = (eij ** 2).sum(axis=0)   # sum-of-squared residuals
+		df     = y.shape[0] - rank(X)     # degrees of freedom
+		s2     = ss / df                  # variance
+		c      = np.ones( b.size )
+		c[0]   = 0
+		t      = (c @ b)  /   ( np.sqrt( s2 * (c @ np.linalg.inv(X.T @ X) @ c) ) + eps )
+		return t
+		
+	
 	@property
 	def uc(self):
 		u = np.unique(c)
@@ -35,6 +50,7 @@ class CyclicalFit(Fit):
 		XX        = []
 		beta      = []
 		yhat      = []
+		z         = []
 		for q in range(Q):
 			tt,yy = self.tr[:,q], r[:,q]
 			X     = self._trend.get_design_matrix( tt )
@@ -43,11 +59,13 @@ class CyclicalFit(Fit):
 			XX.append( X )
 			beta.append( b )
 			yhat.append( yh )
+			z.append( self._tstat(X, b, yy) )
 		XX        = np.array( XX )
 		beta      = np.asarray( beta ).T
 		yhatr     = np.asarray( yhat ).T
 		yhat      = self._unregister(yhatr)
-		return XX, beta, yhatr, yhat
+		z         = np.around(z, 5)
+		return XX, beta, yhatr, yhat, z
 
 	def _register(self):
 		tr,yr = self.regfn( self.t, self.y, self.c )
@@ -78,6 +96,7 @@ class CyclicalFit(Fit):
 		self.beta  = _results[1]
 		self.yhatr = _results[2]
 		self.yhat  = _results[3]
+		self.z     = _results[4]
 		self.X     = self.XX.mean(axis=0)
 	
 
@@ -106,12 +125,15 @@ class CyclicalFit(Fit):
 	def plot_registered(self, ax=None, cmap=None, cbar=None, clabel=None, **kwargs):
 		self._plot_cycles(self.yr, ax, cmap, cbar, clabel, **kwargs)
 
-	def plot_timeseries_with_trend(self, ax=None, points=[0, 0.5, 1], **kwargs):
+	def plot_timeseries_with_trend(self, ax=None, points=None, **kwargs):
+		# points: [0, 0.5, 1]
 		ax     = plt.gca() if (ax is None) else ax
 		ax.plot(self.t, self.y, 'k-')
 		Q      = self.yr.shape[1]
-		inds   = [round(x*(Q-1)) for x in points]
-		print(inds)
+		if points is None:
+			inds = [self.z.argmax(), self.z.argmin()]
+		else:
+			inds = [round(x*(Q-1)) for x in points]
 		for ind in inds:
 			ax.plot(self.tr[:,ind], self.ym[ind] + self.yhatr[:,ind], 'ro-')
 
