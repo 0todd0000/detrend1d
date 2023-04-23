@@ -63,6 +63,8 @@ class CyclicalFit(Fit):
 		return yhat
 
 	def fit(self, t, y, c, regfn=None):
+		if regfn is None:
+			from .. reg import register_linear_n as regfn
 		self.t     = t
 		self.y     = y
 		self.c     = c

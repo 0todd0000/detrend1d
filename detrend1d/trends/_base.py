@@ -42,16 +42,16 @@ class _Trend(object):
 	def apply(self, t, y):
 		return (self._X(t) @ self.beta) + y
 
-	def fit(self, t, y):
-		from .. fits import Fit
-		fit   = Fit( self )
-		fit.fit( t, y )
-		# self.set_beta( fit.beta )
-		return fit
-		
-	# def lse(self, t, y):
-	# 	X  = self._X(t)
+	# def fit(self, t, y):
+	# 	from .. fits import Fit
+	# 	fit   = Fit( self )
+	# 	fit.fit( t, y )
+	# 	# self.set_beta( fit.beta )
+	# 	return fit
 	#
+	# # def lse(self, t, y):
+	# # 	X  = self._X(t)
+	# #
 	
 	
 	def get_design_matrix(self, t):
