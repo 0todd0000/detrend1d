@@ -19,6 +19,7 @@ class CyclicalFit(Fit):
 		self.c        = None  # cycle labels
 		self.tr       = None  # registered time vectors
 		self.yr       = None  # registered DV
+		self.ym       = None  # registered mean
 		self.yhatr    = None  # fits (registered)
 
 	@property
@@ -69,6 +70,7 @@ class CyclicalFit(Fit):
 		_results   = self._register()
 		self.tr    = _results[0]
 		self.yr    = _results[1]
+		self.ym    = self.yr.mean(axis=0)
 		_results   = self._fit_cyclical()
 		self.XX    = _results[0]
 		self.beta  = _results[1]
@@ -101,3 +103,17 @@ class CyclicalFit(Fit):
 	def plot_registered(self, ax=None, cmap=None, cbar=None, clabel=None, **kwargs):
 		self._plot_cycles(self.yr, ax, cmap, cbar, clabel, **kwargs)
 
+	def plot_timeseries_with_trend(self, ax=None, points=[0, 0.5, 1], **kwargs):
+		ax     = plt.gca() if (ax is None) else ax
+		ax.plot(self.t, self.y, 'k-')
+		Q      = self.yr.shape[1]
+		inds   = [round(x*(Q-1)) for x in points]
+		print(inds)
+		for ind in inds:
+			ax.plot(self.tr[:,ind], self.ym[ind] + self.yhatr[:,ind], 'ro-')
+
+	def plot_trend(self, ax=None):
+		ax     = plt.gca() if (ax is None) else ax
+		ax.plot(self.beta.T)
+		ax.legend( ['Slope', 'Intercept'] )
+		
