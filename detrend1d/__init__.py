@@ -7,13 +7,13 @@ from . import reg
 
 
 
-def detrend(t, y, trend='linear'):
+def detrend(t, y, trend='linear', mean_corrected=True):
 	import numpy as np
 	from . fits import Fit
 	trend = trends.str2trend( trend )
 	fit   = Fit( trend )
 	fit.fit(t, y)
-	yd    = fit.get_detrended()
+	yd    = fit.get_detrended( mean_corrected )
 	return yd, fit
 
 

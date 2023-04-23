@@ -63,8 +63,11 @@ class Fit(object):
 		self.yhat  = self.X @ self.beta
 		self._unmask()
 	
-	def get_detrended(self):
-		return self.y - self.yhat
+	def get_detrended(self, mean_corrected=True):
+		yd  = self.y - self.yhat
+		if mean_corrected:
+			yd += np.nanmean( self.y )
+		return yd
 	
 	def plot(self, ax=None, **kwargs):
 		ax    = plt.gca() if (ax is None) else ax
