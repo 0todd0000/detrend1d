@@ -8,9 +8,18 @@ from . import reg
 
 
 def detrend(t, y, trend='linear'):
-	trend = trends.str2trend( trend )
+	import numpy as np
+	trend   = trends.str2trend( trend )
+	_hasnan = np.any( np.isnan(y) )
+	if _hasnan:
+		i   = np.logical_not( np.isnan(y) )
+		t,y = t[i], y[i]
 	fit   = trend.fit(t, y)
 	yd    = fit.get_detrended()
+	if _hasnan:
+		_yd   = yd
+		yd    = np.array( [np.nan] * i.size )
+		yd[i] = _yd
 	return yd, fit
 	
 	
