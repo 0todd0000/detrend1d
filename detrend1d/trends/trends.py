@@ -6,7 +6,7 @@ Inter-cycle trends
 import numpy as np
 from . _base import _Trend
 
-__all__  = ['Linear', 'LinearFixedIntercept']
+__all__  = ['Exponential', 'Linear', 'LinearFixedIntercept', 'Polynomial2', 'Polynomial3']
 
 
 
@@ -27,12 +27,29 @@ __all__  = ['Linear', 'LinearFixedIntercept']
 
 
 
+class Exponential(_Trend):
+	'''
+	Model:   y(t) = a + b*t + c*exp(t)
+	'''
+	@staticmethod
+	def _X(t):   # design matrix
+		n      = t.size
+		X      = np.zeros( (n, 3) )
+		X[:,0] = 1
+		X[:,1] = t
+		X[:,2] = np.exp(t)
+		return X
+
+	def _init_beta(self):
+		self.beta        = np.array([0, 0])
+		self.beta_labels = 'Intercept', 'Slope', 'Exponential'
+		self.fixed       = np.array([False, False, False])
+
+
 class Linear(_Trend):
-	
 	'''
-	Model:   y(t) = a*t + b
+	Model:   y(t) = a + b*t
 	'''
-	
 	@staticmethod
 	def _X(t):   # design matrix
 		n      = t.size
@@ -52,11 +69,9 @@ class Linear(_Trend):
 
 
 class LinearFixedIntercept( Linear ):
-
 	'''
-	Model:   y(t) = a*t + b;  b fixed
+	Model:   y(t) = a + b*t;  a fixed
 	'''
-
 	def __init__(self, intercept=0):
 		self.intercept = float( intercept )
 		super().__init__()
@@ -67,6 +82,45 @@ class LinearFixedIntercept( Linear ):
 		self.fixed       = np.array([False, True])
 		
 		
+
+
+class Polynomial2(_Trend):
+	'''
+	Model:   y(t) = a + b*t * c*t**2
+	'''
+	@staticmethod
+	def _X(t):   # design matrix
+		n      = t.size
+		X      = np.zeros( (n, 3) )
+		X[:,0] = 1
+		X[:,1] = t
+		X[:,2] = t**2
+		return X
+
+	def _init_beta(self):
+		self.beta        = np.array([0, 0])
+		self.beta_labels = 'Intercept', 'x', 'x2'
+		self.fixed       = np.array([False, False, False])
+
+
+class Polynomial3(_Trend):
+	'''
+	Model:   y(t) = a + b*t + c*t**2 + d*t**3
+	'''
+	@staticmethod
+	def _X(t):   # design matrix
+		n      = t.size
+		X      = np.zeros( (n, 4) )
+		X[:,0] = 1
+		X[:,1] = t
+		X[:,2] = t**2
+		X[:,3] = t**3
+		return X
+
+	def _init_beta(self):
+		self.beta        = np.array([0, 0])
+		self.beta_labels = 'Intercept', 'x', 'x2', 'x3'
+		self.fixed       = np.array([False, False, False,False])
 
 
 
