@@ -22,3 +22,16 @@ class Compound(object):
 		t     = np.linspace(t0, t1, n)
 		y     = self.apply(t, np.zeros(n))
 		ax.plot(t, y)	
+		
+		
+		
+def str2trend(s):
+	s = str(s).lower()
+	if s == 'linear':
+		trend = Linear()
+	elif s == 'linear_fixed_intercept':
+		trend = LinearFixedIntercept()
+	else:
+		trendstrs = 'linear', 'linear_fixed_intercept'
+		raise ValueError( f'Unknown trend: "{s}". Trend must be one of: {trendstrs}')
+	return trend
