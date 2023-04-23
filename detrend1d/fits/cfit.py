@@ -80,6 +80,7 @@ class CyclicalFit(Fit):
 		self.yhat  = _results[3]
 		self.X     = self.XX.mean(axis=0)
 	
+
 	def get_detrended_registered(self):
 		return self.yr - self.yhatr
 	
