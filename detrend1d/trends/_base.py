@@ -10,10 +10,11 @@ from matplotlib import pyplot as plt
 
 class _Trend(object):
 	
-	def __init__(self):
+	def __init__(self, intercept=None):
 		self.beta     = None
 		self.fixed    = None
 		self._init_beta()
+		self.set_intercept( intercept )
 
 	def __repr__(self):
 		s  = f'{self.__class__.__name__}\n'
@@ -42,18 +43,6 @@ class _Trend(object):
 	def apply(self, t, y):
 		return (self._X(t) @ self.beta) + y
 
-	# def fit(self, t, y):
-	# 	from .. fits import Fit
-	# 	fit   = Fit( self )
-	# 	fit.fit( t, y )
-	# 	# self.set_beta( fit.beta )
-	# 	return fit
-	#
-	# # def lse(self, t, y):
-	# # 	X  = self._X(t)
-	# #
-	
-	
 	def get_design_matrix(self, t):
 		return self._X(t)
 	
@@ -66,6 +55,15 @@ class _Trend(object):
 
 	def set_beta(self, b):
 		self.beta  = np.asarray(b)
+		
+	def set_intercept(self, x=None):
+		if x is None:
+			self.beta[0]     = 0
+			self.fixed[0]    = False
+		else:
+			self.beta[0]     = float(x)
+			self.fixed[0]    = True
+		
 
 
 
