@@ -75,5 +75,17 @@ class Fit(object):
 
 	def plot_design(self, ax=None, **kwargs):
 		ax    = plt.gca() if (ax is None) else ax
-		ax.pcolor(self.X, **kwargs)
+		if 'edgecolor' in kwargs:
+			ec = kwargs['edgecolor']
+			kwargs.pop('edgecolor')
+		else:
+			ec = '0.7'
+		ax.pcolor(self.X, edgecolor=ec, **kwargs)
+		x     = np.arange( self.beta.shape[0] )
+		y     = np.arange( self.yr.shape[0] )
+		xl    = [f'b{xx}' for xx in x]
+		ax.set_xticks( x + 0.5 )
+		ax.set_yticks( y + 0.5 )
+		ax.set_xticklabels( xl )
+		ax.set_yticklabels( y )
 
