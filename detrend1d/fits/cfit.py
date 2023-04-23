@@ -79,3 +79,25 @@ class CyclicalFit(Fit):
 	def get_detrended_registered(self):
 		return self.yr - self.yhatr
 	
+	
+	@staticmethod
+	def _plot_cycles(y, ax=None, cmap=None, cbar=False, clabel=None, **kwargs):
+		ax     = plt.gca() if (ax is None) else ax
+		cmap   = plt.cm.jet if (cmap is None) else cmap
+		n      = y.shape[0]
+		colors = cmap( np.linspace(0, 1, n) )
+		for cc,yy in zip(colors, y):
+			ax.plot( yy, color=cc, **kwargs )
+		if cbar:
+			norm   = plt.Normalize(vmin=0, vmax=n)
+			sm     = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+			cb     = plt.colorbar(sm, ax=ax)
+			label  = 'Cycle Number' if (clabel is None) else str(clabel)
+			cb.set_label( label )
+			
+	def plot_detrended_registered(self, ax=None, cmap=None, cbar=None, clabel=None, **kwargs):
+		self._plot_cycles(self.yr - self.yhatr, ax, cmap, cbar, clabel, **kwargs)
+		
+	def plot_registered(self, ax=None, cmap=None, cbar=None, clabel=None, **kwargs):
+		self._plot_cycles(self.yr, ax, cmap, cbar, clabel, **kwargs)
+
