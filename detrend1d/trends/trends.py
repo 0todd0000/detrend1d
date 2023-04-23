@@ -37,13 +37,15 @@ class Linear(_Trend):
 	def _X(t):   # design matrix
 		n      = t.size
 		X      = np.zeros( (n, 2) )
-		X[:,0] = t
-		X[:,1] = 1
+		X[:,0] = 1
+		X[:,1] = t
 		return X
 
 	def _init_beta(self):
-		self.beta  = np.array([0, 0])  # slope, intercept
-		self.fixed = np.array([False, False])
+		self.beta        = np.array([0, 0])
+		self.beta_labels = 'Intercept', 'Slope'
+		self.fixed       = np.array([False, False])
+		
 
 
 
@@ -60,8 +62,11 @@ class LinearFixedIntercept( Linear ):
 		super().__init__()
 
 	def _init_beta(self):
-		self.beta  = np.array([0, self.intercept])  # slope, intercept
-		self.fixed = np.array([False, True])
+		self.beta        = np.array([self.intercept, 0])
+		self.beta_labels = 'Intercept', 'Slope'
+		self.fixed       = np.array([False, True])
+		
+		
 
 
 

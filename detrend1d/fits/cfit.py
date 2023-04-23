@@ -115,5 +115,5 @@ class CyclicalFit(Fit):
 	def plot_trend(self, ax=None):
 		ax     = plt.gca() if (ax is None) else ax
 		ax.plot(self.beta.T)
-		ax.legend( ['Slope', 'Intercept'] )
+		ax.legend( self._trend.beta_labels )
 		
