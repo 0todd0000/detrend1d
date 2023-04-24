@@ -85,7 +85,7 @@ class CyclicalFit(Fit):
 			from .. reg import register_linear_n as regfn
 		self.t     = t
 		self.y     = y
-		self.c     = c
+		self.c     = np.asarray(c, dtype=int)
 		self.regfn = regfn
 		_results   = self._register()
 		self.tr    = _results[0]
@@ -99,6 +99,9 @@ class CyclicalFit(Fit):
 		self.z     = _results[4]
 		self.X     = self.XX.mean(axis=0)
 	
+
+	def get_detrended(self, mean_corrected=True):
+		return self.y - self.yhat
 
 	def get_detrended_registered(self):
 		return self.yr - self.yhatr

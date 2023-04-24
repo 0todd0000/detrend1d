@@ -20,12 +20,12 @@ class Fit(object):
 
 
 	def __repr__(self):
-		s   = 'Fit\n'
-		s  += '   trend_type:  %s\n'   %self.trend_type
-		s  += '   beta:        %s\n'   %self.beta_str
-		s  += '   t:          (%d,) time array\n'   %self.Q
-		s  += '   y:          (%d,) dependent variable array\n'   %self.Q
-		s  += '   yhat:       (%d,) fitted values array\n'   %self.Q
+		s   = f'{self.__class__.__name__}\n'
+		s  +=  '   trend_type:  %s\n'   %self.trend_type
+		s  +=  '   beta:        %s\n'   %self.beta_str
+		s  +=  '   t:          (%d,) time array\n'   %self.Q
+		s  +=  '   y:          (%d,) dependent variable array\n'   %self.Q
+		s  +=  '   yhat:       (%d,) fitted values array\n'   %self.Q
 		return s
 
 	@property
