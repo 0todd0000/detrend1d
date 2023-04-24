@@ -7,7 +7,7 @@ from . import reg
 
 
 
-def detrend(t, y, trend='linear', mean_corrected=True, intercept=None):
+def detrend(t, y, trend='linear', mean_corrected=False, intercept=None):
 	import numpy as np
 	from . fits import Fit
 	trend = trends.str2trend( trend, intercept )

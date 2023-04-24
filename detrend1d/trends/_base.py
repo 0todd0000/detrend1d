@@ -40,6 +40,10 @@ class _Trend(object):
 	def hasfixed(self):   # design matrix (abstract method)
 		return np.any( self.fixed )
 
+	@property
+	def name(self):   # design matrix (abstract method)
+		return self.__class__.__name__.lower()
+
 	def apply(self, t, y):
 		return (self._X(t) @ self.beta) + y
 

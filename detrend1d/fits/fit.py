@@ -18,6 +18,28 @@ class Fit(object):
 		self.y        = None
 		self.yhat     = None
 
+
+	def __repr__(self):
+		s   = 'Fit\n'
+		s  += '   trend_type:  %s\n'   %self.trend_type
+		s  += '   beta:        %s\n'   %self.beta_str
+		s  += '   t:          (%d,) time array\n'   %self.Q
+		s  += '   y:          (%d,) dependent variable array\n'   %self.Q
+		s  += '   yhat:       (%d,) fitted values array\n'   %self.Q
+		return s
+
+	@property
+	def Q(self):
+		return self.t.size
+
+	@property
+	def beta_str(self):
+		return str( self.beta ) if (self.beta.ndim==1) else (str(self.beta.shape) + ' array')
+
+	@property
+	def trend_type(self):
+		return self._trend.name
+
 	def _fit(self, X, y):
 		if self._trend.hasfixed:
 			i0,i1 = self._trend.free, self._trend.fixed
