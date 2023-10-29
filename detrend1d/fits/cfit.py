@@ -100,13 +100,21 @@ class CyclicalFit(Fit):
 		self.X     = self.XX.mean(axis=0)
 	
 
-	def get_detrended(self, mean_corrected=True):
-		return self.y - self.yhat
+	def get_detrended(self, mean_centered=False):
+		y = self.y - self.yhat
+		if mean_centered:
+			y = y + self.y.mean() - y.mean()
+		return y
 
-	def get_detrended_registered(self):
-		return self.yr - self.yhatr
+	def get_detrended_registered(self, mean_centered=False):
+		y = self.yr - self.yhatr
+		if mean_centered:
+			y = y + self.yr.mean() - y.mean()
+		return y
 	
-	
+	def get_registered(self):
+		return self.yr
+
 	@staticmethod
 	def _plot_cycles(y, ax=None, cmap=None, cbar=False, clabel=None, **kwargs):
 		ax     = plt.gca() if (ax is None) else ax
