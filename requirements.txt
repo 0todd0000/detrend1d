@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+ipython
+notebook
+PyQt5
+pandas
+spm1d
