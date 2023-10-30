@@ -90,6 +90,21 @@ class Fit(object):
 		if mean_corrected:
 			yd += np.nanmean( self.y )
 		return yd
+		
+	def get_detrended_registered(self, c, regfn=None, mean_corrected=True):
+		if regfn is None:
+			from .. reg import register_linear_n as regfn
+		yd     = self.get_detrended( mean_corrected )
+		t,ydr  = regfn(self.t, yd, c)
+		return ydr
+
+
+	def get_registered(self, c, regfn=None):
+		if regfn is None:
+			from .. reg import register_linear_n as regfn
+		t,yr = regfn(self.t, self.y, c)
+		return yr
+		
 	
 	def plot(self, ax=None, **kwargs):
 		ax    = plt.gca() if (ax is None) else ax
